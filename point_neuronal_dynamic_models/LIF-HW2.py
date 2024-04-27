@@ -28,20 +28,25 @@ for V_th_mV in [-70, -30, 10]:
 
     # Simulation:
     for i, t in enumerate(T[:-1]):
-        freq = 1 / (spikes[-1] - spikes[-2]) if len(spikes) > 1 else 0
-        F.append(freq) 
+        spiked = False
         if t > t_init:
             V_m_inf_i = V_rest + R_m * I[i]
             V_m[i + 1] = V_m_inf_i + (V_m[i] - V_m_inf_i) * np.exp(-dt / tau)
             if V_m[i] >= V_th:
+                spiked = True
                 spikes.append(t * 1e3)
                 V_m[i] = V_spike
                 t_init = t + tau_ref
-        print(f"step={i}, t={t}, f={freq}, I(t)={I[i]}, u_inf={(V_rest + R_m * I[i])}, u_now={V_m[i]}")
+        freq = 1 / (spikes[-1] - spikes[-2]) if len(spikes) > 1 else 0
+        F.append(freq) 
+        msg = f"step={i}, t={t}, f={freq}, I(t)={I[i]}, u_inf={(V_rest + R_m * I[i])}, u_now={V_m[i]}"
+        if spiked:
+            msg += ", SPIKED!"
+        print(msg)
 
     # Plot:
     plt.figure(figsize=(10, 5))
-    plt.title(f'Leaky Integrate-and-Fire Model (V_th={V_th})', fontsize=15) 
+    plt.title(f'Leaky Integrate-and-Fire Model (V_th={V_th} V)', fontsize=15) 
     plt.ylabel('Membrane Potential (mV)', fontsize=15) 
     plt.xlabel('Time (msec)', fontsize=15)
     plt.plot(T * 1e3, V_m * 1e3, linewidth=5, label='V_m')

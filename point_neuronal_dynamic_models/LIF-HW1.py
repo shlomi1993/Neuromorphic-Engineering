@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-for tau_factor in [6]:
+for tau_factor in [2, 4, 6]:
 
     # Model Parameters:
     T = 50 * 1e-3                   # Simulation time          [Sec]
