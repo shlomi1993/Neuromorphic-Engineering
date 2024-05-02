@@ -24,7 +24,7 @@ for V_th_mV in [-70, -30, 10]:
     F = [0]                         # Frequencies
 
     # Define the stimulus:
-    I = np.array([dI * t for t in range(len(T))])
+    I = np.array([1e-04] * len(T))  # 'Flat' input current stimuli
 
     # Simulation:
     for i, t in enumerate(T[:-1]):
@@ -51,7 +51,7 @@ for V_th_mV in [-70, -30, 10]:
     plt.xlabel('Time (msec)', fontsize=15)
     plt.plot(T * 1e3, V_m * 1e3, linewidth=5, label='V_m')
     plt.plot(T * 1e3, 100 / max(I) * I, label='Stimuli (Scaled)', color='sandybrown', linewidth=2)
-    plt.ylim([-75, 100])
+    plt.ylim([-75, 120])
     plt.axvline(x=spikes[0], c='red', label='Spike')
     for s in spikes[1:]:
         plt.axvline(x=s, c='red')
