@@ -25,7 +25,7 @@ plt.plot(T * 1e+3, I * 1e+6, color='blue', linewidth=2)
 plt.show()
 
 # Simulate for each tau
-for tau_factor in [6]:
+for tau_factor in [2, 4, 6]:
 
     # Simulation parameters
     t_init = 0                          # Stimulus init time       [seconds]
