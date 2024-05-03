@@ -92,24 +92,35 @@ class IzhikevichModel:
 
 def main():
 
-    # Instantiate and Izhikevich model
-    izhikevich = IzhikevichModel(T=200, dt=0.25, v_0=-70, v_apex=30)
+    # Instantiate an Izhikevich model
+    izhikevich = IzhikevichModel(T=200, dt=0.1, v_0=-70, v_apex=30)
 
     # Define the stimulus a step function
     stimulus = np.zeros(len(izhikevich.times))
-    stimulus[21:] = 15
+    stimulus[41:] = 10
 
-    # Simulation parameters for three response dynamics, and titles for each experiment
+    # Simulation parameters for six response dynamics, and title for each experiment
     params_and_titles = [
-        (IzhikevichParams(a=0.02, b=0.2, c=-65, d=8), 'Regular Spiking'),
-        (IzhikevichParams(a=0.02, b=0.2, c=-50, d=2), 'Chattering'),
-        (IzhikevichParams(a=0.1,  b=0.2, c=-65, d=2), 'Fast spiking')
+        (IzhikevichParams(a=0.02, b=0.2, c=-65, d=8), 'Regular Spiking (RS)'),
+        (IzhikevichParams(a=0.02, b=0.2, c=-55, d=4), 'Intrinsically Bursting (IB)'),
+        (IzhikevichParams(a=0.02, b=0.2, c=-50, d=2), 'Chattering (CH)'),
+        (IzhikevichParams(a=0.1,  b=0.2, c=-65, d=2), 'Fast Spiking (FS)'),
+        (IzhikevichParams(a=0.1, b=0.26, c=-65, d=5), 'Resonator (RZ)'),  # TODO
+        (IzhikevichParams(a=0.02, b=0.25, c=-65, d=2), 'Low Threshold Spiking (LTS)'),
     ]
 
     # Simulate and plot
     for params, title in params_and_titles:
         trace = izhikevich.simulate(params, stimulus)
         izhikevich.plot(title=title, stimulus=stimulus, trace=trace)
+
+    # TODO
+    # Handle the Thalamo-Cortical cases by modifying the membrane resting potential value
+    # params = IzhikevichParams(a=0.02, b=0.25, c=-65, d=0.05)
+    # for v_0 in [-63, -87]:
+    #     izhikevich.v_0 = v_0
+    #     trace = izhikevich.simulate(params, stimulus)
+    #     izhikevich.plot(title=f'Thalamo-Cortical (TC) when v_0={v_0}', stimulus=stimulus, trace=trace)
 
 
 if __name__ == '__main__':
