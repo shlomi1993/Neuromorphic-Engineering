@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import re
 
 from dataclasses import dataclass
 
@@ -98,7 +99,9 @@ class IzhikevichModel:
         plt.plot(self.times, trace[1], linewidth=2, label='Recovery', color='green')
         plt.plot(self.times, stimulus + self.v_0, label='Stimuli (Scaled)', color='sandybrown', linewidth=2)
         plt.legend(loc=1)
-        plt.show()
+        # plt.show()
+        clean_title = re.sub(r'\s*\([^()]*\)\s*', '', title).replace(' ', '_').replace('-', '_')
+        plt.savefig(fname=clean_title + '.png')
 
 
 def define_stimuli(model):
@@ -128,14 +131,14 @@ def main():
 
     # Simulation parameters for six response dynamics, and title for each experiment
     experiments = [
-        ('Regular Spiking (RS)',        -70,    IzhikevichParams(a=0.02, b=0.2,  c=-65, d=8),       step_stimulus),
-        ('Intrinsically Bursting (IB)', -70,    IzhikevichParams(a=0.02, b=0.2,  c=-55, d=4),       step_stimulus),
-        ('Chattering (CH)',             -70,    IzhikevichParams(a=0.02, b=0.2,  c=-50, d=2),       step_stimulus),
-        ('Fast Spiking (FS)',           -70,    IzhikevichParams(a=0.1,  b=0.2,  c=-65, d=2),       step_stimulus),
+        ('Regular Spiking (RS)',        -70,    IzhikevichParams(a=0.02, b=0.2,  c=-65, d=8),      step_stimulus),
+        ('Intrinsically Bursting (IB)', -70,    IzhikevichParams(a=0.02, b=0.2,  c=-55, d=4),      step_stimulus),
+        ('Chattering (CH)',             -70,    IzhikevichParams(a=0.02, b=0.2,  c=-50, d=2),      step_stimulus),
+        ('Fast Spiking (FS)',           -70,    IzhikevichParams(a=0.1,  b=0.2,  c=-65, d=2),      step_stimulus),
         ('Low Threshold Spiking (LTS)', -70,    IzhikevichParams(a=0.02, b=0.25, c=-65, d=2),      step_stimulus),
-        ('Resonator (RZ)',              -70,    IzhikevichParams(a=0.1,  b=0.26, c=-65, d=2),       step_pulse_stimulus),
+        ('Resonator (RZ)',              -70,    IzhikevichParams(a=0.1,  b=0.26, c=-65, d=2),      step_pulse_stimulus),
         ('Thalamo-Cortical (TC)',       -63,    IzhikevichParams(a=0.02, b=0.25, c=-65, d=0.05),   step_stimulus),
-        ('Thalamo-Cortical (TC) - neg', -87,    IzhikevichParams(a=0.02, b=0.25, c=-65, d=0.05),   neg_step_stimulus)
+        ('Thalamo-Cortical (TC) - Neg', -87,    IzhikevichParams(a=0.02, b=0.25, c=-65, d=0.05),   neg_step_stimulus)
     ]
 
     # Simulate and plot each experiment
