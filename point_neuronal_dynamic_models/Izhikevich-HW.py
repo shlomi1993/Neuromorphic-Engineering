@@ -131,14 +131,14 @@ def main():
 
     # Simulation parameters for six response dynamics, and title for each experiment
     experiments = [
-        ('Regular Spiking (RS)',        -70,    IzhikevichParams(a=0.02, b=0.2,  c=-65, d=8),      step_stimulus),
-        ('Intrinsically Bursting (IB)', -70,    IzhikevichParams(a=0.02, b=0.2,  c=-55, d=4),      step_stimulus),
-        ('Chattering (CH)',             -70,    IzhikevichParams(a=0.02, b=0.2,  c=-50, d=2),      step_stimulus),
-        ('Fast Spiking (FS)',           -70,    IzhikevichParams(a=0.1,  b=0.2,  c=-65, d=2),      step_stimulus),
-        ('Low Threshold Spiking (LTS)', -70,    IzhikevichParams(a=0.02, b=0.25, c=-65, d=2),      step_stimulus),
-        ('Resonator (RZ)',              -70,    IzhikevichParams(a=0.1,  b=0.26, c=-65, d=2),      step_pulse_stimulus),
-        ('Thalamo-Cortical (TC)',       -63,    IzhikevichParams(a=0.02, b=0.25, c=-65, d=0.05),   step_stimulus),
-        ('Thalamo-Cortical (TC) - Neg', -87,    IzhikevichParams(a=0.02, b=0.25, c=-65, d=0.05),   neg_step_stimulus)
+        ('Regular Spiking (RS)',         -70,  IzhikevichParams(a=0.02, b=0.2,  c=-65, d=8),     step_stimulus),
+        ('Intrinsically Bursting (IB)',  -70,  IzhikevichParams(a=0.02, b=0.2,  c=-55, d=4),     step_stimulus),
+        ('Chattering (CH)',              -70,  IzhikevichParams(a=0.02, b=0.2,  c=-50, d=2),     step_stimulus),
+        ('Fast Spiking (FS)',            -70,  IzhikevichParams(a=0.1,  b=0.2,  c=-65, d=2),     step_stimulus),
+        ('Low Threshold Spiking (LTS)',  -70,  IzhikevichParams(a=0.02, b=0.25, c=-65, d=2),     step_stimulus),
+        ('Resonator (RZ)',               -70,  IzhikevichParams(a=0.1,  b=0.26, c=-65, d=2),     step_pulse_stimulus),
+        ('Thalamo-Cortical (TC)',        -63,  IzhikevichParams(a=0.02, b=0.25, c=-65, d=0.05),  step_stimulus),
+        ('Thalamo-Cortical (TC) - Neg',  -87,  IzhikevichParams(a=0.02, b=0.25, c=-65, d=0.05),  neg_step_stimulus)
     ]
 
     # Simulate and plot each experiment
