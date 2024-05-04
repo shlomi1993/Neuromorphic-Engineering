@@ -28,10 +28,21 @@ class IzhikevichModel:
             v_spike_apex (float): Spike voltage apex            [mV]
             stimulus (np.ndarray): Stimulus current intensities [Array of Amperes]
         """
-        self.times = np.arange(0, T + dt, dt)   # Time array
-        self.dt = dt
+        self.set_time(T, dt)
         self.v_0 = v_0
         self.v_spike_apex = v_apex
+
+    @property
+    def times(self):
+        return self._times
+    
+    @property
+    def dt(self):
+        return self._dt
+
+    def set_time(self, T: float, dt: float) -> None:
+        self._times = np.arange(0, T + dt, dt)   # Time array
+        self._dt = dt
 
     def simulate(self, params: IzhikevichParams, stimulus: np.ndarray) -> np.ndarray:
         """
@@ -46,19 +57,19 @@ class IzhikevichModel:
         """
         a, b, c, d = params.as_tuple()
 
-        trace = np.zeros((2, len(self.times)))   # For tracing du and dv
+        trace = np.zeros((2, len(self.times)))  # For tracing du and dv
         v  = self.v_0                           # v represents the memory potential in mV
         u  = b * v                              # u represents the membrane recovery variable
 
         for i, I in enumerate(stimulus):
-            v += self.dt * (0.04 * v ** 2 + 5 * v + 140 - u + I) 
+            v += self.dt * (0.04 * v ** 2 + 5 * v + 140 - u + I)
             u += self.dt * a * (b * v - u)
             if v > self.v_spike_apex:
                 trace[0, i] = self.v_spike_apex
                 v = c
                 u += d
             else:
-                trace[0, i] = v 
+                trace[0, i] = v
                 trace[1, i] = u
 
         return trace
@@ -90,37 +101,48 @@ class IzhikevichModel:
         plt.show()
 
 
+def define_stimuli(model):
+    # Define stimulus a step function
+    step_stimulus = np.zeros(len(model.times))
+    step_stimulus[41:] = 10
+
+    # Define a stimulus as a step function with an additional pulse after a while for the Resonator (RZ) dynamic
+    step_pulse_stimulus = np.zeros(len(model.times))
+    step_pulse_stimulus[41:] = 10
+    step_pulse_stimulus[201:221] = 20
+
+    # Define a stimulus as a negative step function for the second Thalamo-Cortical (TC) dynamic
+    neg_step_stimulus = np.zeros(len(model.times)) - 10
+    neg_step_stimulus[41:] = 0
+
+    return step_stimulus, step_pulse_stimulus, neg_step_stimulus
+
+
 def main():
 
     # Instantiate an Izhikevich model
     izhikevich = IzhikevichModel(T=200, dt=0.1, v_0=-70, v_apex=30)
 
-    # Define the stimulus a step function
-    stimulus = np.zeros(len(izhikevich.times))
-    stimulus[41:] = 10
+    # Define stimuli
+    step_stimulus, step_pulse_stimulus, neg_step_stimulus = define_stimuli(izhikevich)
 
     # Simulation parameters for six response dynamics, and title for each experiment
-    params_and_titles = [
-        (IzhikevichParams(a=0.02, b=0.2, c=-65, d=8), 'Regular Spiking (RS)'),
-        (IzhikevichParams(a=0.02, b=0.2, c=-55, d=4), 'Intrinsically Bursting (IB)'),
-        (IzhikevichParams(a=0.02, b=0.2, c=-50, d=2), 'Chattering (CH)'),
-        (IzhikevichParams(a=0.1,  b=0.2, c=-65, d=2), 'Fast Spiking (FS)'),
-        (IzhikevichParams(a=0.1, b=0.26, c=-65, d=5), 'Resonator (RZ)'),  # TODO
-        (IzhikevichParams(a=0.02, b=0.25, c=-65, d=2), 'Low Threshold Spiking (LTS)'),
+    experiments = [
+        ('Regular Spiking (RS)',        -70,    IzhikevichParams(a=0.02, b=0.2,  c=-65, d=8),       step_stimulus),
+        ('Intrinsically Bursting (IB)', -70,    IzhikevichParams(a=0.02, b=0.2,  c=-55, d=4),       step_stimulus),
+        ('Chattering (CH)',             -70,    IzhikevichParams(a=0.02, b=0.2,  c=-50, d=2),       step_stimulus),
+        ('Fast Spiking (FS)',           -70,    IzhikevichParams(a=0.1,  b=0.2,  c=-65, d=2),       step_stimulus),
+        ('Low Threshold Spiking (LTS)', -70,    IzhikevichParams(a=0.02, b=0.25, c=-65, d=2),      step_stimulus),
+        ('Resonator (RZ)',              -70,    IzhikevichParams(a=0.1,  b=0.26, c=-65, d=2),       step_pulse_stimulus),
+        ('Thalamo-Cortical (TC)',       -63,    IzhikevichParams(a=0.02, b=0.25, c=-65, d=0.05),   step_stimulus),
+        ('Thalamo-Cortical (TC) - neg', -87,    IzhikevichParams(a=0.02, b=0.25, c=-65, d=0.05),   neg_step_stimulus)
     ]
 
-    # Simulate and plot
-    for params, title in params_and_titles:
+    # Simulate and plot each experiment
+    for title, v_0, params, stimulus in experiments:
+        izhikevich.v_0 = v_0
         trace = izhikevich.simulate(params, stimulus)
         izhikevich.plot(title=title, stimulus=stimulus, trace=trace)
-
-    # TODO
-    # Handle the Thalamo-Cortical cases by modifying the membrane resting potential value
-    # params = IzhikevichParams(a=0.02, b=0.25, c=-65, d=0.05)
-    # for v_0 in [-63, -87]:
-    #     izhikevich.v_0 = v_0
-    #     trace = izhikevich.simulate(params, stimulus)
-    #     izhikevich.plot(title=f'Thalamo-Cortical (TC) when v_0={v_0}', stimulus=stimulus, trace=trace)
 
 
 if __name__ == '__main__':
