@@ -158,9 +158,17 @@ class HhModel:
         
 
 def main():
-    hh = HhModel()
-    results = hh.simulate(point_count=5000)
-    results.plot()
+    E_values = [
+        {"E_Na": 115, "E_K": -12, "E_leak": 10.6},      # Standard values
+        {"E_Na": 150, "E_K": -80, "E_leak": 0},         # Extreme values
+        {"E_Na": -12, "E_K": 115, "E_leak": 10.6},      # Inverted equilibrium potentials
+        {"E_Na": 1000, "E_K": -500, "E_leak": 10.6},    # Non-physiological values
+    ]
+
+    for Es in E_values:
+        hh = HhModel(**Es)
+        results = hh.simulate(point_count=5000)
+        results.plot()
 
 
 if __name__ == '__main__':
