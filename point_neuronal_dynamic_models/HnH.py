@@ -78,27 +78,28 @@ class HhModel:
     """
     This class implements the Hodgkin-Huxley model
     """
-
-    E_Na = 115
-    E_K = -12
-    E_leak = 10.6
-
-    g_Na = 120
-    g_K = 36
-    g_leak = 0.3
-
-    m = Gate()
-    n = Gate()
-    h = Gate()
-
-    C_m = 1
-
-    def __init__(self, starting_voltage: float = 0.0):
+    def __init__(self, starting_voltage: float = 0.0, membrane_capacitance: float = 1.0, E_Na: float = 115.0,
+                 E_K: float = -12.0, E_leak: float = 10.6, g_Na: float = 120, g_K: float = 36, g_leak: float = 0.3) -> None:
+        # Initialize model parameters
+        self.E_Na = E_Na
+        self.E_K = E_K
+        self.E_leak = E_leak
+        self.g_Na = g_Na
+        self.g_K = g_K
+        self.g_leak = g_leak
         self.V_m = starting_voltage
+        self.C_m = membrane_capacitance
+
+        # Initialize gates
+        self.m = Gate()
+        self.n = Gate()
+        self.h = Gate()
         self.update_gate_time_constants(starting_voltage)
         self.m.set_infinite_state()
         self.n.set_infinite_state()
         self.h.set_infinite_state()
+
+        # Initialize currents
         self.I_Na = 0.0
         self.I_K  = 0.0
         self.I_leak = 0.0
