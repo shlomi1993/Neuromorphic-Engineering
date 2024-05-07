@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from dataclasses import dataclass
-from uuid import uuid4
 
 
 @dataclass
@@ -36,8 +35,17 @@ class HhModelResults:
     I_leak: np.ndarray
     I_sum: np.ndarray
 
+    @staticmethod
+    def _output(title: str, identifier: str, to_file: bool) -> None:
+        plt.xlim([90, 160])
+        plt.legend(loc=1)
+        if identifier:
+            title += f" ({identifier})"
+        plt.title(title, fontsize=15)
+        plt.savefig(title.replace(' - ', '_').replace(' ', '_').lower()) if to_file else plt.show()
+
     def plot(self, membrane_potential: bool = False, gate_states: bool = False, ion_currents: bool = False,
-             to_file: bool = False) -> None:
+             to_file: bool = False, identifier: str = None) -> None:
         assert membrane_potential or gate_states or ion_currents, 'No plot options selected'
 
         # Plot membrane potential over time
@@ -47,10 +55,7 @@ class HhModelResults:
             plt.plot(self.times, self.stimuli - 70, label='Stimuli (Scaled)', linewidth=2, color='sandybrown')
             plt.ylabel('Membrane Potential (mV)', fontsize=15)
             plt.xlabel('Time (msec)', fontsize=15)
-            plt.xlim([90, 160])
-            plt.title('Hodgkin-Huxley Neuron Model', fontsize=15)
-            plt.legend(loc=1)
-            plt.savefig(f'hh_membrane_potential_{uuid4()}.png') if to_file else plt.show()
+            self._output('HH Model - Ion Currents', identifier, to_file)
 
         # Plot gate states over time
         if gate_states:
@@ -60,11 +65,7 @@ class HhModelResults:
             plt.plot(self.times, self.n, label='n (K)', linewidth=2)
             plt.ylabel('Gate state', fontsize=15)
             plt.xlabel('Time (msec)', fontsize=15)
-            plt.xlim([90, 160])
-            plt.title('Hodgkin-Huxley Spiking Neuron Model: Gatings', fontsize=15)
-            plt.legend(loc=1)
-            plt.savefig(f'hh_gate_states_{uuid4()}.png') if to_file else plt.show()
-
+            self._output('HH Model - Ion Currents', identifier, to_file)
 
         # Plot ion currents over time
         if ion_currents:
@@ -75,10 +76,7 @@ class HhModelResults:
             plt.plot(self.times, self.I_sum, label='I_sum', linewidth=2)
             plt.ylabel('Current (uA)', fontsize=15)
             plt.xlabel('Time (msec)', fontsize=15)
-            plt.title('Hodgkin-Huxley Spiking Neuron Model: Ion Currents', fontsize=15)
-            plt.xlim([90, 160])
-            plt.legend(loc=1)
-            plt.savefig(f'hh_ion_currents_{uuid4()}.png') if to_file else plt.show()
+            self._output('HH Model - Ion Currents', identifier, to_file)
 
 
 class HhModel:
@@ -165,25 +163,30 @@ class HhModel:
         
 
 def main():
-    E_assignments = [
-        # {'E_Na': 115, 'E_K': -12, 'E_leak': 10.6},    # Standard values
-        {'E_Na': 40,  'E_K': -12, 'E_leak': 10.6},      # Low E_Na
-        # {'E_Na': 100, 'E_K': -12, 'E_leak': 10.6},
-        # {'E_Na': 190, 'E_K': -12, 'E_leak': 10.6},
-        # {'E_Na': 100, 'E_K': -45, 'E_leak': 10.6},
-        # {'E_Na': 100, 'E_K': -30, 'E_leak': 10.6},
-        # {'E_Na': 100, 'E_K': 5,   'E_leak': 10.6},
-        {'E_Na': 100, 'E_K': 10,  'E_leak': 10.6},      # High E_K
-        {'E_Na': 115, 'E_K': -12, 'E_leak': -20},       # Low E_leak
-        # {'E_Na': 115, 'E_K': -12, 'E_leak': 350},
+    experiments = [
+        ('E_Na=40',    {'E_Na': 40,  'E_K': -12, 'E_leak': 10.6}),  # Low E_Na
+        ('E_K=10',     {'E_Na': 100, 'E_K': 10,  'E_leak': 10.6}),  # High E_K
+        ('E_leak=-20', {'E_Na': 115, 'E_K': -12, 'E_leak': -20}),   # Low E_leak
     ]
 
-    for E_values in E_assignments:
-        print(E_values)
-        hh = HhModel(**E_values)
+
+    for case_identifier, E_kwargs in experiments:
+        print(', '.join([f'{k}={v}' for k, v in E_kwargs.items()]))
+        hh = HhModel(**E_kwargs)
         results = hh.simulate(point_count=5000)
-        results.plot(membrane_potential=True, to_file=True)
+        results.plot(membrane_potential=True, to_file=True, identifier=case_identifier)
 
 
 if __name__ == '__main__':
     main()
+
+
+# additional_interesting_cases = [
+#     {'E_Na': 115, 'E_K': -12, 'E_leak': 10.6},    # Standard values
+#     {'E_Na': 100, 'E_K': -12, 'E_leak': 10.6},
+#     {'E_Na': 190, 'E_K': -12, 'E_leak': 10.6},
+#     {'E_Na': 100, 'E_K': -45, 'E_leak': 10.6},
+#     {'E_Na': 100, 'E_K': -30, 'E_leak': 10.6},
+#     {'E_Na': 100, 'E_K': 5,   'E_leak': 10.6},
+#     {'E_Na': 115, 'E_K': -12, 'E_leak': 350},
+# ]
