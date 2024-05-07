@@ -2,13 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from dataclasses import dataclass
+from uuid import uuid4
 
 
 @dataclass
 class Gate:
-    """
+    '''
     This class represents a gate in an Hodgkin-Huxley circuit
-    """
+    '''
     alpha: float = 0
     beta: float = 0
     state: float = 0
@@ -35,49 +36,55 @@ class HhModelResults:
     I_leak: np.ndarray
     I_sum: np.ndarray
 
-    def plot(self) -> None:
-        
+    def plot(self, membrane_potential: bool = False, gate_states: bool = False, ion_currents: bool = False,
+             to_file: bool = False) -> None:
+        assert membrane_potential or gate_states or ion_currents, 'No plot options selected'
+
         # Plot membrane potential over time
-        plt.figure(figsize=(10,5))
-        plt.plot(self.times, self.V_m - 70, linewidth=2, label='Vm')
-        plt.plot(self.times, self.stimuli - 70, label='Stimuli (Scaled)', linewidth=2, color='sandybrown')
-        plt.ylabel("Membrane Potential (mV)", fontsize=15)
-        plt.xlabel('Time (msec)', fontsize=15)
-        plt.xlim([90, 160])
-        plt.title("Hodgkin-Huxley Neuron Model", fontsize=15)
-        plt.legend(loc=1)
-        plt.show()
+        if membrane_potential:
+            plt.figure(figsize=(10,5))
+            plt.plot(self.times, self.V_m - 70, linewidth=2, label='Vm')
+            plt.plot(self.times, self.stimuli - 70, label='Stimuli (Scaled)', linewidth=2, color='sandybrown')
+            plt.ylabel('Membrane Potential (mV)', fontsize=15)
+            plt.xlabel('Time (msec)', fontsize=15)
+            plt.xlim([90, 160])
+            plt.title('Hodgkin-Huxley Neuron Model', fontsize=15)
+            plt.legend(loc=1)
+            plt.savefig(f'hh_membrane_potential_{uuid4()}.png') if to_file else plt.show()
 
         # Plot gate states over time
-        plt.figure(figsize=(10,5))
-        plt.plot(self.times, self.m, label='m (Na)', linewidth=2)
-        plt.plot(self.times, self.h, label='h (Na)', linewidth=2)
-        plt.plot(self.times, self.n, label='n (K)', linewidth=2)
-        plt.ylabel("Gate state", fontsize=15)
-        plt.xlabel('Time (msec)', fontsize=15)
-        plt.xlim([90, 160])
-        plt.title("Hodgkin-Huxley Spiking Neuron Model: Gatings", fontsize=15)
-        plt.legend(loc=1)
-        plt.show()
+        if gate_states:
+            plt.figure(figsize=(10,5))
+            plt.plot(self.times, self.m, label='m (Na)', linewidth=2)
+            plt.plot(self.times, self.h, label='h (Na)', linewidth=2)
+            plt.plot(self.times, self.n, label='n (K)', linewidth=2)
+            plt.ylabel('Gate state', fontsize=15)
+            plt.xlabel('Time (msec)', fontsize=15)
+            plt.xlim([90, 160])
+            plt.title('Hodgkin-Huxley Spiking Neuron Model: Gatings', fontsize=15)
+            plt.legend(loc=1)
+            plt.savefig(f'hh_gate_states_{uuid4()}.png') if to_file else plt.show()
+
 
         # Plot ion currents over time
-        plt.figure(figsize=(10,5))
-        plt.plot(self.times, self.I_Na, label='I_Na', linewidth=2)
-        plt.plot(self.times, self.I_K, label='I_K', linewidth=2)
-        plt.plot(self.times, self.I_leak, label='I_leak', linewidth=2)
-        plt.plot(self.times, self.I_sum, label='I_sum', linewidth=2)
-        plt.ylabel("Current (uA)", fontsize=15)
-        plt.xlabel('Time (msec)', fontsize=15)
-        plt.title("Hodgkin-Huxley Spiking Neuron Model: Ion Currents", fontsize=15)
-        plt.xlim([90, 160])
-        plt.legend(loc=1)
-        plt.show()
+        if ion_currents:
+            plt.figure(figsize=(10,5))
+            plt.plot(self.times, self.I_Na, label='I_Na', linewidth=2)
+            plt.plot(self.times, self.I_K, label='I_K', linewidth=2)
+            plt.plot(self.times, self.I_leak, label='I_leak', linewidth=2)
+            plt.plot(self.times, self.I_sum, label='I_sum', linewidth=2)
+            plt.ylabel('Current (uA)', fontsize=15)
+            plt.xlabel('Time (msec)', fontsize=15)
+            plt.title('Hodgkin-Huxley Spiking Neuron Model: Ion Currents', fontsize=15)
+            plt.xlim([90, 160])
+            plt.legend(loc=1)
+            plt.savefig(f'hh_ion_currents_{uuid4()}.png') if to_file else plt.show()
 
 
 class HhModel:
-    """
+    '''
     This class implements the Hodgkin-Huxley model
-    """
+    '''
     def __init__(self, starting_voltage: float = 0.0, membrane_capacitance: float = 1.0, E_Na: float = 115.0,
                  E_K: float = -12.0, E_leak: float = 10.6, g_Na: float = 120, g_K: float = 36, g_leak: float = 0.3) -> None:
         # Initialize model parameters
@@ -158,17 +165,24 @@ class HhModel:
         
 
 def main():
-    E_values = [
-        {"E_Na": 115, "E_K": -12, "E_leak": 10.6},      # Standard values
-        {"E_Na": 150, "E_K": -80, "E_leak": 0},         # Extreme values
-        {"E_Na": -12, "E_K": 115, "E_leak": 10.6},      # Inverted equilibrium potentials
-        {"E_Na": 1000, "E_K": -500, "E_leak": 10.6},    # Non-physiological values
+    E_assignments = [
+        # {'E_Na': 115, 'E_K': -12, 'E_leak': 10.6},    # Standard values
+        {'E_Na': 40,  'E_K': -12, 'E_leak': 10.6},      # Low E_Na
+        # {'E_Na': 100, 'E_K': -12, 'E_leak': 10.6},
+        # {'E_Na': 190, 'E_K': -12, 'E_leak': 10.6},
+        # {'E_Na': 100, 'E_K': -45, 'E_leak': 10.6},
+        # {'E_Na': 100, 'E_K': -30, 'E_leak': 10.6},
+        # {'E_Na': 100, 'E_K': 5,   'E_leak': 10.6},
+        {'E_Na': 100, 'E_K': 10,  'E_leak': 10.6},      # High E_K
+        {'E_Na': 115, 'E_K': -12, 'E_leak': -20},       # Low E_leak
+        # {'E_Na': 115, 'E_K': -12, 'E_leak': 350},
     ]
 
-    for Es in E_values:
-        hh = HhModel(**Es)
+    for E_values in E_assignments:
+        print(E_values)
+        hh = HhModel(**E_values)
         results = hh.simulate(point_count=5000)
-        results.plot()
+        results.plot(membrane_potential=True, to_file=True)
 
 
 if __name__ == '__main__':
