@@ -55,7 +55,7 @@ class HhModelResults:
             plt.plot(self.times, self.stimuli - 70, label='Stimuli (Scaled)', linewidth=2, color='sandybrown')
             plt.ylabel('Membrane Potential (mV)', fontsize=15)
             plt.xlabel('Time (msec)', fontsize=15)
-            self._output('HH Model - Ion Currents', identifier, to_file)
+            self._output('HH Model - Membrane Potential', identifier, to_file)
 
         # Plot gate states over time
         if gate_states:
@@ -65,7 +65,7 @@ class HhModelResults:
             plt.plot(self.times, self.n, label='n (K)', linewidth=2)
             plt.ylabel('Gate state', fontsize=15)
             plt.xlabel('Time (msec)', fontsize=15)
-            self._output('HH Model - Ion Currents', identifier, to_file)
+            self._output('HH Model - Gatings', identifier, to_file)
 
         # Plot ion currents over time
         if ion_currents:
