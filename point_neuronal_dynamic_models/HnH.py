@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -119,7 +120,7 @@ class HhModel:
         self.h.beta = 1 / (np.exp((30 - V_m) / 10) + 1)
 
     def update_cell_voltage(self, stimulus_current: float, delta_tms: float) -> None:
-        self.I_Na = np.power(self.m.state, 3) * self.g_Na * self.h.state*(self.V_m - self.E_Na)
+        self.I_Na = np.power(self.m.state, 3) * self.g_Na * self.h.state * (self.V_m - self.E_Na)
         self.I_K = np.power(self.n.state, 4) * self.g_K * (self.V_m - self.E_K)
         self.I_leak = self.g_leak * (self.V_m - self.E_leak)
         self.I_sum = stimulus_current - self.I_Na - self.I_K - self.I_leak
@@ -163,18 +164,24 @@ class HhModel:
         
 
 def main():
-    experiments = [
-        ('E_Na=40',    {'E_Na': 40,  'E_K': -12, 'E_leak': 10.6}),  # Low E_Na
-        ('E_K=10',     {'E_Na': 100, 'E_K': 10,  'E_leak': 10.6}),  # High E_K
-        ('E_leak=-20', {'E_Na': 115, 'E_K': -12, 'E_leak': -20}),   # Low E_leak
-    ]
+    to_file = len(sys.argv) > 1 and sys.argv[1] == '--savefig'
 
+    # experiments = [("", {'E_Na': x, 'E_K': -12, 'E_leak': 10.6}) for x in range(50, 200, 5)]
+    # experiments = [("", {'E_Na': 115, 'E_K': x, 'E_leak': 10.6}) for x in range(0, 100, 2)]
+    # experiments = [("", {'E_Na': 115, 'E_K': -12, 'E_leak': x}) for x in range(-30, 30, 2)]
+
+    experiments = [
+        # ("default",    {'E_Na': 115, 'E_K': -12, 'E_leak': 10.6}),    # Standard values
+        ('E_Na=180',   {'E_Na': 180,  'E_K': -12, 'E_leak': 10.6}),     # High E_Na
+        ('E_K=10',     {'E_Na': 100, 'E_K': 10,  'E_leak': 10.6}),      # High E_K
+        ('E_leak=0', {'E_Na': 115, 'E_K': -12, 'E_leak': 0}),           # Low E_leak
+    ]
 
     for case_identifier, E_kwargs in experiments:
         print(', '.join([f'{k}={v}' for k, v in E_kwargs.items()]))
         hh = HhModel(**E_kwargs)
         results = hh.simulate(point_count=5000)
-        results.plot(membrane_potential=True, to_file=True, identifier=case_identifier)
+        results.plot(membrane_potential=True, gate_states=False, ion_currents=True, to_file=to_file, identifier=case_identifier)
 
 
 if __name__ == '__main__':
@@ -182,11 +189,13 @@ if __name__ == '__main__':
 
 
 # additional_interesting_cases = [
-#     {'E_Na': 115, 'E_K': -12, 'E_leak': 10.6},    # Standard values
 #     {'E_Na': 100, 'E_K': -12, 'E_leak': 10.6},
 #     {'E_Na': 190, 'E_K': -12, 'E_leak': 10.6},
 #     {'E_Na': 100, 'E_K': -45, 'E_leak': 10.6},
 #     {'E_Na': 100, 'E_K': -30, 'E_leak': 10.6},
 #     {'E_Na': 100, 'E_K': 5,   'E_leak': 10.6},
 #     {'E_Na': 115, 'E_K': -12, 'E_leak': 350},
+#     {'E_Na': 40,  'E_K': -12, 'E_leak': 10.6},
+#     {'E_Na': 100, 'E_K': 10,  'E_leak': 10.6},
+#     {'E_Na': 115, 'E_K': -12, 'E_leak': -20}
 # ]
