@@ -1,6 +1,7 @@
+import sys
+import re
 import numpy as np
 import matplotlib.pyplot as plt
-import re
 
 from dataclasses import dataclass
 
@@ -75,7 +76,7 @@ class IzhikevichModel:
 
         return trace
 
-    def plot(self, title: str, stimulus: np.ndarray, trace: np.ndarray) -> None:
+    def plot(self, title: str, stimulus: np.ndarray, trace: np.ndarray, savefig: bool = False) -> None:
         """
         Plots the membrane potential over time as simulated by the model, using the given simulation trace and stimulus.
 
@@ -83,6 +84,7 @@ class IzhikevichModel:
             title (str): The title of the plot.
             stimulus (np.ndarray): The simulation input stimulus current array.
             trace (np.ndarray): The simulation result's trace array, which contains the v and u values over time.
+            savefig (bool): Whether to save the plot to a file.
 
         Raises:
             ValueError: If the shapes of the stimulus and trace arrays are incompatible.
@@ -99,9 +101,11 @@ class IzhikevichModel:
         plt.plot(self.times, trace[1], linewidth=2, label='Recovery', color='green')
         plt.plot(self.times, stimulus + self.v_0, label='Stimuli (Scaled)', color='sandybrown', linewidth=2)
         plt.legend(loc=1)
-        # plt.show()
-        clean_title = re.sub(r'\s*\([^()]*\)\s*', '', title).replace(' ', '_').replace('-', '_')
-        plt.savefig(fname=clean_title + '.png')
+        if savefig:
+            clean_title = re.sub(r'\s*\([^()]*\)\s*', '', title).replace(' ', '_').replace('-', '_')
+            plt.savefig(fname=clean_title + '.png')
+        else:
+            plt.show()
 
 
 def define_stimuli(model):
@@ -122,6 +126,7 @@ def define_stimuli(model):
 
 
 def main():
+    savefig = len(sys.argv) > 1 and sys.argv[1] == '--savefig'
 
     # Instantiate an Izhikevich model
     izhikevich = IzhikevichModel(T=200, dt=0.1, v_0=-70, v_apex=30)
@@ -145,7 +150,7 @@ def main():
     for title, v_0, params, stimulus in experiments:
         izhikevich.v_0 = v_0
         trace = izhikevich.simulate(params, stimulus)
-        izhikevich.plot(title=title, stimulus=stimulus, trace=trace)
+        izhikevich.plot(title, stimulus, trace, savefig)
 
 
 if __name__ == '__main__':
