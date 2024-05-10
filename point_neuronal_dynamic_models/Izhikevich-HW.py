@@ -46,6 +46,25 @@ class IzhikevichModel:
         self._times = np.arange(0, T + dt, dt)   # Time array
         self._dt = dt
 
+    def define_stimuli(self):
+        stab_time = 1000
+        
+        # Define stimulus a step function
+        step_stimulus = np.zeros(len(self.times))
+        step_stimulus[stab_time + 541:] = 10
+
+        # Define a stimulus as a step function with an additional pulse after a while for the Resonator (RZ) dynamic
+        step_pulse_stimulus = np.zeros(len(self.times))
+        step_pulse_stimulus[stab_time + 541:] = 0.2
+        step_pulse_stimulus[stab_time + 1501:stab_time + 1522] = 10
+
+        # Define a stimulus as a negative step function for the second Thalamo-Cortical (TC) dynamic
+        neg_step_stimulus = np.zeros(len(self.times)) - 10
+        neg_step_stimulus[stab_time + 541:] = 0
+
+        return step_stimulus, step_pulse_stimulus, neg_step_stimulus
+
+
     def simulate(self, params: IzhikevichParams, stimulus: np.ndarray) -> np.ndarray:
         """
         Simulates the Izhikevich model with the given parameters and input stimulus currents.
@@ -93,13 +112,16 @@ class IzhikevichModel:
             The trace array should have shape (2, N), where N is the number of time steps, with the first row
             representing the values of membrane potential and the second row representing the values of the recovery variable.
         """
+        times = self.times[1000:].copy()
+        times -= 100
+        
         plt.figure(figsize=(10, 5))
         plt.title(f'Izhikevich Model: {title}', fontsize=15) 
         plt.ylabel('Membrane Potential (mV)', fontsize=15) 
         plt.xlabel('Time (msec)', fontsize=15)
-        plt.plot(self.times, trace[0], linewidth=2, label='Vm')
-        plt.plot(self.times, trace[1], linewidth=2, label='Recovery', color='green')
-        plt.plot(self.times, stimulus + self.v_0, label='Stimuli (Scaled)', color='sandybrown', linewidth=2)
+        plt.plot(times, trace[0][1000:], linewidth=2, label='Vm')
+        plt.plot(times, trace[1][1000:], linewidth=2, label='Recovery', color='green')
+        plt.plot(times, (stimulus + self.v_0)[1000:], label='Stimuli (Scaled)', color='sandybrown', linewidth=2)
         plt.legend(loc=1)
         if savefig:
             clean_title = re.sub(r'\s*\([^()]*\)\s*', '', title).replace(' ', '_').replace('-', '_')
@@ -108,31 +130,14 @@ class IzhikevichModel:
             plt.show()
 
 
-def define_stimuli(model):
-    # Define stimulus a step function
-    step_stimulus = np.zeros(len(model.times))
-    step_stimulus[41:] = 10
-
-    # Define a stimulus as a step function with an additional pulse after a while for the Resonator (RZ) dynamic
-    step_pulse_stimulus = np.zeros(len(model.times))
-    step_pulse_stimulus[41:] = 10
-    step_pulse_stimulus[201:221] = 20
-
-    # Define a stimulus as a negative step function for the second Thalamo-Cortical (TC) dynamic
-    neg_step_stimulus = np.zeros(len(model.times)) - 10
-    neg_step_stimulus[41:] = 0
-
-    return step_stimulus, step_pulse_stimulus, neg_step_stimulus
-
-
 def main():
     savefig = len(sys.argv) > 1 and sys.argv[1] == '--savefig'
 
     # Instantiate an Izhikevich model
-    izhikevich = IzhikevichModel(T=200, dt=0.1, v_0=-70, v_apex=30)
+    izhikevich = IzhikevichModel(T=400, dt=0.1, v_0=-70, v_apex=30)
 
     # Define stimuli
-    step_stimulus, step_pulse_stimulus, neg_step_stimulus = define_stimuli(izhikevich)
+    step_stimulus, step_pulse_stimulus, neg_step_stimulus = izhikevich.define_stimuli()
 
     # Simulation parameters for six response dynamics, and title for each experiment
     experiments = [
