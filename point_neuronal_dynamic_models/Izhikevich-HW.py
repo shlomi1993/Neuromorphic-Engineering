@@ -19,20 +19,23 @@ class IzhikevichParams:
 
 class IzhikevichModel:
 
-    def __init__(self, T: float, dt: float, v_0: float = -70, v_apex: float = 30) -> None:
+    def __init__(self, T: float, dt: float, v_0: float = -70, v_apex: float = 30, stabilization_time: float = 100) -> None:
         """
         Initializes the Izhikevich model with the given parameters.
 
         Args:
-            T (float): Simulation total time                    [milliseconds]
-            dt (float): Simulation time interval                [milliseconds]
-            v_0 (float): Membrane resting potential             [milliseconds]
-            v_spike_apex (float): Spike voltage apex            [mV]
-            stimulus (np.ndarray): Stimulus current intensities [Array of Amperes]
+            T (float): Simulation total time                                [milliseconds]
+            dt (float): Simulation time interval                            [milliseconds]
+            v_0 (float): Membrane resting potential                         [milliseconds]
+            v_spike_apex (float): Spike voltage apex                        [mV]
+            stimulus (np.ndarray): Stimulus current intensities             [Array of Amperes]
+            stabilization_time (float): model voltage stabilization time    [milliseconds]
         """
-        self.set_time(T, dt)
+        self.set_time(T, dt, stabilization_time)
         self.v_0 = v_0
         self.v_spike_apex = v_apex
+        
+        self._stabilization_time = stabilization_time
 
     @property
     def times(self):
@@ -42,8 +45,9 @@ class IzhikevichModel:
     def dt(self):
         return self._dt
 
-    def set_time(self, T: float, dt: float) -> None:
-        self._times = np.arange(0, T + dt, dt)   # Time array
+    def set_time(self, T: float, dt: float, stabilization_time: float = 100) -> None:
+        assert T > stabilization_time, "T must be greater than stabilization_time"
+        self._times = np.arange(-stabilization_time, T + dt, dt)   # Time array
         self._dt = dt
 
     def simulate(self, params: IzhikevichParams, stimulus: np.ndarray) -> np.ndarray:
@@ -93,16 +97,17 @@ class IzhikevichModel:
             The trace array should have shape (2, N), where N is the number of time steps, with the first row
             representing the values of membrane potential and the second row representing the values of the recovery variable.
         """
-        # times = self.times[1000:].copy()
-        # times -= 100
+        sep = int(self._stabilization_time / self._dt)
+        times = self.times[sep:].copy()
+        # times -= self._stabilization_time
         
         plt.figure(figsize=(10, 5))
         plt.title(f'Izhikevich Model: {title}', fontsize=15) 
         plt.ylabel('Membrane Potential (mV)', fontsize=15) 
         plt.xlabel('Time (msec)', fontsize=15)
-        plt.plot(self.times, trace[0], linewidth=2, label='Vm')
-        plt.plot(self.times, trace[1], linewidth=2, label='Recovery', color='green')
-        plt.plot(self.times, stimulus + self.v_0, label='Stimuli (Scaled)', color='sandybrown', linewidth=2)
+        plt.plot(times, trace[0][sep:], linewidth=2, label='Vm')
+        plt.plot(times, trace[1][sep:], linewidth=2, label='Recovery', color='green')
+        plt.plot(times, (stimulus + self.v_0)[sep:], label='Stimuli (Scaled)', color='sandybrown', linewidth=2)
         plt.legend(loc=1)
         if savefig:
             clean_title = re.sub(r'\s*\([^()]*\)\s*', '', title).replace(' ', '_').replace('-', '_')
@@ -134,7 +139,7 @@ def main():
     savefig = len(sys.argv) > 1 and sys.argv[1] == '--savefig'
 
     # Instantiate an Izhikevich model
-    izhikevich = IzhikevichModel(T=200, dt=0.1)
+    izhikevich = IzhikevichModel(T=300, dt=0.1)
 
     # Define stimuli
     step_stimulus, step_pulse_stimulus, neg_step_stimulus = define_stimuli(len(izhikevich.times))
