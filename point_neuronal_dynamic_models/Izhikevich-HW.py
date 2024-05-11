@@ -119,16 +119,16 @@ def main():
 
     # Define stimulus as a step function
     step_stimulus = np.zeros(len(izhikevich.times))
-    step_stimulus[izhikevich.start_idx + 50:] = 10
+    step_stimulus[izhikevich.start_idx + 100:] = 10
 
     # Define a stimulus as a step function with an additional pulse after a while for the Resonator (RZ) dynamic
     step_pulse_stimulus = np.zeros(len(izhikevich.times))
-    step_pulse_stimulus[izhikevich.start_idx + 50:] = 0.2
-    step_pulse_stimulus[izhikevich.start_idx + 900:izhikevich.start_idx + 920] = 10
+    step_pulse_stimulus[izhikevich.start_idx + 100:] = 0.2
+    step_pulse_stimulus[izhikevich.start_idx + 1000:izhikevich.start_idx + 1020] = 5
 
     # Define a stimulus as a negative step function for the second Thalamo-Cortical (TC) dynamic
     neg_step_stimulus = np.zeros(len(izhikevich.times)) - 10
-    neg_step_stimulus[izhikevich.start_idx + 50:] = 0
+    neg_step_stimulus[izhikevich.start_idx + 100:] = 0
 
     # Simulation parameters for six response dynamics, and title for each experiment
     experiments = [
