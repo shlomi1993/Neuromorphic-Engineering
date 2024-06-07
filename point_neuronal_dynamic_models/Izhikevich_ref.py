@@ -49,6 +49,6 @@ for exp in range(len(a)):
     plt.xlabel('Time (msec)', fontsize=15)
     plt.plot(time, trace[0], linewidth=2, label = 'Vm')
     plt.plot(time, trace[1], linewidth=2, label = 'Recovery', color='green')
-    plt.plot(time, stim + v0, label = 'Stimuli (Scaled)', color='sandybrown', linewidth=2)
+    plt.plot(time, stim + v0, label='Stimuli (Scaled)', color='sandybrown', linewidth=2)
     plt.legend(loc=1)
     plt.show()

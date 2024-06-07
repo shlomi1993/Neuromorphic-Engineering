@@ -12,7 +12,7 @@ V_rest = -70 * 1e-3             # Resting potential        [V]
 R_m = 1 * 1e3                   # Membrane Resistance      [Ohm]
 C_m = 5 * 1e-6                  # Capacitance              [F]
 tau_ref = 1 * 1e-3              # Refractory Period        [Sec]
-v_th = -40 * 1e-3               # Spike threshold          [V]
+V_th = -40 * 1e-3               # Spike threshold          [V]
 I = 0.2 * 1e-3                  # Current stimulus         [A]
 V_spike = 50 * 1e-3             # Spike voltage            [V]
 
@@ -26,13 +26,12 @@ spikes = []                     # Spikes timings
 I = I * signal.windows.triang(len(T))  # Triangular stimulation pattern
 
 # Simulation:
-# import ipdb; ipdb.set_trace(context=11)
 for i, t in enumerate(T[:-1]):
     if t > t_init:
         V_m_inf_i = V_rest + R_m * I[i]
         V_m[i + 1] = V_m_inf_i + (V_m[i] - V_m_inf_i) * np.exp(-dt / tau)
-        if V_m[i] >= v_th:
-            spikes.append(t * 1e3) 
+        if V_m[i] >= V_th:
+            spikes.append(t * 1e3)
             V_m[i] = V_spike
             t_init = t + tau_ref
 
@@ -47,6 +46,6 @@ plt.ylim([-75, 100])
 plt.axvline(x=spikes[0], c='red', label='Spike')
 for s in spikes[1:]:
     plt.axvline(x=s, c='red')
-plt.axhline(y=v_th / 1e-3, c='black', label = 'Threshold', linestyle='--')
+plt.axhline(y=V_th / 1e-3, c='black', label = 'Threshold', linestyle='--')
 plt.legend()
 plt.show()
