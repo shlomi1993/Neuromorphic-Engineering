@@ -1,25 +1,24 @@
 import nengo
 import matplotlib.pyplot as plt
 
+tau_synapse = 0.1
 
 # Model definition
 model = nengo.Network()
 with model:
     stim = nengo.Node([0.5, -0.5])
     ens1 = nengo.Ensemble(n_neurons=1, dimensions=2)  # To attempt to represent 2D input using a single neuron    
-    ens2 = nengo.Ensemble(n_neurons=100, dimensions=2)  # To attempt to represent 2D input using sufficient neurons
+    ens2 = nengo.Ensemble(n_neurons=5, dimensions=2)  # To attempt to represent 2D input using sufficient neurons
     nengo.Connection(stim, ens1)
     nengo.Connection(stim, ens2)
     
-    probe_stim = nengo.Probe(stim, synapse=0.1)
-    probe1 = nengo.Probe(ens1, synapse=0.1)
-    probe2 = nengo.Probe(ens2, synapse=0.1)
-
+    probe_stim = nengo.Probe(stim, synapse=tau_synapse)
+    probe1 = nengo.Probe(ens1, synapse=tau_synapse)
+    probe2 = nengo.Probe(ens2, synapse=tau_synapse)
 
 # Model simulation
 with nengo.Simulator(model) as sim:
     sim.run(1.0)
-
 
 # Plot results
 t = sim.trange()
