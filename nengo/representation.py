@@ -21,7 +21,6 @@ plt.plot(J, n_RL.rates(J, gain=10, bias=0))
 plt.xlabel('I')
 plt.ylabel('$a$ (Hz)')
 plt.show()
-
 plt.plot(J, n_LIF.rates(J, gain=1, bias=0)) 
 plt.xlabel('I')
 plt.ylabel('a (Hz)'); 
@@ -39,8 +38,8 @@ with model:
     voltage_p = nengo.Probe(ens.neurons, 'voltage')
     stim_p = nengo.Probe(stimulus)
 
-sim = nengo.Simulator(model)
-sim.run(1)
+with nengo.Simulator(model) as sim:
+    sim.run(1)
 
 t = sim.trange()     
 plt.figure(figsize=(10, 4))
@@ -51,7 +50,6 @@ plt.ylim((-1, 2))
 plt.ylabel('Voltage')
 plt.xlabel('Time')
 plt.legend(loc='lower left')
-
 rasterplot(t, sim.data[spikes_p], ax=plt.ax.twinx(), use_eventplot=True)
 plt.ylim((-1, 2))
 plt.show()
@@ -67,15 +65,14 @@ with model:
     stim_p = nengo.Probe(stim)
     spikes_p = nengo.Probe(ens.neurons, 'output')
 
-sim = nengo.Simulator(model)
-sim.run(.6)
+with nengo.Simulator(model) as sim:
+    sim.run(.6)
 
+t = sim.trange()
 plt.plot(*tuning_curves(ens, sim))
 plt.xlabel('I')
 plt.ylabel('$a$ (Hz)')
 plt.show()
-
-t = sim.trange()
 plt.figure(figsize=(12, 6))
 plt.plot(t, sim.data[stim_p],'r', linewidth=4)
 plt.ax = plt.gca()
@@ -96,18 +93,17 @@ with model:
     stim_p = nengo.Probe(stim)
     spikes_p = nengo.Probe(ens.neurons, 'output')
 
-sim = nengo.Simulator(model)
-sim.run(.6)
+with nengo.Simulator(model) as sim:
+    sim.run(.6)
 
 x = sim.data[stim_p][:,0]
 A = sim.data[spikes_p]
 
+t = sim.trange()
 plt.plot(*tuning_curves(ens, sim))
 plt.xlabel('I')
 plt.ylabel('$a$ (Hz)')
 plt.show()
-
-t = sim.trange()
 plt.figure(figsize=(12, 6))
 plt.ax = plt.gca()
 plt.plot(t, sim.data[stim_p],'r', linewidth=4)
@@ -127,9 +123,9 @@ with model:
     nengo.Connection(stim, ens)
     stim_p = nengo.Probe(stim)
     spikes_p = nengo.Probe(ens.neurons, 'output')
-   
-sim = nengo.Simulator(model)
-sim.run(.6)
+
+with nengo.Simulator(model) as sim:
+    sim.run(.6)
 
 t = sim.trange()
 x = sim.data[stim_p][:,0]
@@ -161,8 +157,8 @@ with model:
     stim_p = nengo.Probe(stim)
     spikes_p = nengo.Probe(ens.neurons, 'output')
 
-sim = nengo.Simulator(model)
-sim.run(.6)
+with nengo.Simulator(model) as sim:
+    sim.run(.6)
 
 x = sim.data[stim_p][:,0]
 
@@ -237,8 +233,9 @@ with model:
     stim_p = nengo.Probe(stim)
     spikes_p = nengo.Probe(ens.neurons, 'output')
 
-sim = nengo.Simulator(model)
-sim.run(1)
+with nengo.Simulator(model) as sim:
+    sim.run(1)
+
 sig = sim.data[stim_p][:,0]
 
 fspikes1 = np.convolve(sim.data[spikes_p][:,0], h, mode='same')
@@ -278,8 +275,8 @@ with model:
     dec_p = nengo.Probe(ens, synapse=0.05)
     spikes_p = nengo.Probe(ens.neurons, 'output')
     
-sim = nengo.Simulator(model)
-sim.run(1)
+with nengo.Simulator(model) as sim:
+    sim.run(1)
 
 sig = sim.data[stim_p][:,0]
 
@@ -307,7 +304,7 @@ d = sim.data[connection].weights.T
 x, A = tuning_curves(neurons, sim)
 xhat = np.dot(A, 1 * d)
 
-x = 1*x
+x = 1 * x
 plt.figure(figsize=(3, 4))
 plt.plot(x, A)
 plt.xlabel('x')
@@ -363,9 +360,9 @@ sim = nengo.Simulator(model)
 
 d = sim.data[connection].weights.T
 x, A = tuning_curves(neurons, sim)
-xhat = np.dot(A, 1*d)
+xhat = np.dot(A, 1 * d)
 
-x= 1*x
+x = 1 * x
 plt.figure(figsize=(3,4))
 plt.plot(x, A)
 plt.xlabel('x')
@@ -400,7 +397,7 @@ chi = np.dot(A, U)
 
 for i in range(5):
     plt.plot(x, chi[:,i], label='$\chi_%d$=%1.3g'%(i, S[i]), linewidth=3)
-plt.legend(loc='best')    
+plt.legend(loc='best')
 plt.figure()
 plt.xlabel('neuron')
 plt.loglog(S, linewidth=4)
