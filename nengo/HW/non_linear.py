@@ -9,8 +9,8 @@ nonlinear = lambda x: x ** 2
 model = nengo.Network()
 with model:
     stim = nengo.Node(lambda t: np.sin(t))
-    ens1 = nengo.Ensemble(n_neurons=1, dimensions=1)  # To attempt to represent 2D input using a single neuron    
-    ens2 = nengo.Ensemble(n_neurons=50, dimensions=1)  # To attempt to represent 2D input using sufficient neurons
+    ens1 = nengo.Ensemble(n_neurons=1, dimensions=1)  # To attempt to represent f(x)=x^2 using a single neuron    
+    ens2 = nengo.Ensemble(n_neurons=50, dimensions=1)  # To attempt to represent f(x)=x^2 using sufficient neurons
     nengo.Connection(stim, ens1)
     nengo.Connection(stim, ens2)
     
@@ -22,8 +22,8 @@ with model:
     
     # Probes to record data
     probe_stim = nengo.Probe(stim)
-    probe_1_neuron = nengo.Probe(out1, synapse=tau_synapse)
-    probe_50_neurons = nengo.Probe(out2, synapse=tau_synapse)
+    probe1 = nengo.Probe(out1, synapse=tau_synapse)
+    probe2 = nengo.Probe(out2, synapse=tau_synapse)
 
 # Model simulation
 with nengo.Simulator(model) as sim:
@@ -33,14 +33,14 @@ with nengo.Simulator(model) as sim:
 t = sim.trange()
 plt.figure(figsize=(12, 9))
 plt.subplot(2, 1, 1)
-plt.title("Input Signal")
+plt.title('Input Signal')
 plt.plot(t, sim.data[probe_stim])
-plt.ylabel("Input")
+plt.ylabel('Input')
 plt.subplot(2, 1, 2)
-plt.title("Nonlinear Function Representation")
-plt.plot(t, sim.data[probe_1_neuron], label="1 Neuron")
-plt.plot(t, sim.data[probe_50_neurons], label="50 Neurons")
-plt.xlabel("Time (s)")
-plt.ylabel("Output")
+plt.title('Nonlinear Function Representation')
+plt.plot(t, sim.data[probe1], label='1 Neuron')
+plt.plot(t, sim.data[probe2], label='50 Neurons')
+plt.xlabel('Time (s)')
+plt.ylabel('Output')
 plt.legend()
 plt.show()

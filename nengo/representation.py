@@ -32,7 +32,7 @@ plt.show()
 model = nengo.Network(label='One Neuron')
 with model:
     stimulus = nengo.Node(lambda t: np.sin(10 * t))
-    ens = nengo.Ensemble(n_neurons=1, dimensions=1, encoders = [[1]], intercepts = [0.5], max_rates= [100])
+    ens = nengo.Ensemble(n_neurons=1, dimensions=1, encoders=[[1]], intercepts=[0.5], max_rates=[100])
     nengo.Connection(stimulus, ens)
     spikes_p = nengo.Probe(ens.neurons, 'output')
     voltage_p = nengo.Probe(ens.neurons, 'voltage')
