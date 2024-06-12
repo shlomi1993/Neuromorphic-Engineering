@@ -46,7 +46,7 @@ for n_neurons in [1, 10, 50, 1000]:
     plt.ylabel('a (Hz)', fontdict=axis_title_fontdict)
     plt.plot(*tuning_curves(ensemble, sim))
 
-    ## Plot decoding
+    ## Plot function representation
     plt.subplot(1, 2, 2)
     plt.title('Function Representation', fontdict=subplot_title_fontdict)
     plt.xlabel('x', fontdict=axis_title_fontdict)
