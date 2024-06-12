@@ -5,13 +5,12 @@ r1 = 1.0
 r2 = 1.5
 
 def split_to_axis(data_points):
-    x0_axis = []
-    x1_axis = []
-    for x0, x1 in data_points:
-        x0_axis.append(x0)
-        x1_axis.append(x1)
-    return x0_axis, x1_axis
+    """
+    Transforms [[x0, y0,], [x1, y1], ..., [xn, yn]] to [[x0, x1, ..., xn], [y0, y1, ..., yn]]
+    """
+    return list(zip(*data_points))
 
+# Model definition
 model = nengo.Network()
 with model:
     stim = nengo.Node([1, 1])
@@ -20,15 +19,14 @@ with model:
     nengo.Connection(stim, a)
     nengo.Connection(stim, b)
 
-    # Probes to record data
     probe_a = nengo.Probe(a, synapse=0.01)
     probe_b = nengo.Probe(b, synapse=0.01)
 
-# Run the simulation
+# Model simulation
 with nengo.Simulator(model) as sim:
     sim.run(1.0)
 
-# Plot the results
+# Plot results
 plt.figure(figsize=(12, 6))
 plt.subplot(1, 2, 1)
 plt.grid(True)
