@@ -226,7 +226,7 @@ h = h / np.linalg.norm(h, 1)
 model = nengo.Network(label='Decoding Neurons')
 with model:
     stim = nengo.Node(lambda t: np.sin(10 * t))
-    ens = nengo.Ensemble(n_neurons=2, dimensions=1, encoders = [[1],[-1]], intercepts=[-.5, -.5], max_rates= [100, 100])
+    ens = nengo.Ensemble(n_neurons=2, dimensions=1, encoders = [[1],[-1]], intercepts=[-0.5, -0.5], max_rates=[100, 100])
     nengo.Connection(stim, ens)
     temp = nengo.Ensemble(n_neurons=1, dimensions=1)
     connection = nengo.Connection(ens, temp)  # Generating the decoders

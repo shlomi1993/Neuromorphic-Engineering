@@ -3,71 +3,59 @@ import matplotlib.pyplot as plt
 import nengo
 
 from nengo.utils.matplotlib import rasterplot
-from nengo.dists import Uniform
 from nengo.utils.ensemble import tuning_curves
 
 
-plt.rc('font', size=14, weight='bold')
+target = lambda x: x + np.sin(x)
+tau_synapse = 0.01
 
+# Simulate for each requested number of neurons
+for n_neurons in [100]:#[1, 10, 50, 1000]:
 
-# Rectified linear and NEF LIF neurons
+    # Model definition
+    model = nengo.Network()
+    with model:
+        input_node = nengo.Node(target)
+        ensemble = nengo.Ensemble(n_neurons=n_neurons, dimensions=1, radius=30)
+        output_node = nengo.Node(size_in=1)
+        nengo.Connection(input_node, ensemble)
+        nengo.Connection(ensemble, output_node)
 
-J = np.linspace(-1, 10, 100)
-plt.figure(figsize=(8, 6))
-plt.plot(J, nengo.neurons.LIFRate(tau_rc=0.02, tau_ref=0.002).rates(J, gain=1, bias=0)) 
-plt.xlabel('I')
-plt.ylabel('a (Hz)'); 
-plt.show()
+        input_probe = nengo.Probe(input_node, synapse=tau_synapse)
+        output_probe = nengo.Probe(output_node, 'output', synapse=tau_synapse)
 
+    # Model simulation
+    with nengo.Simulator(model) as sim:
+        sim.run(20.0)
 
-# Two LIF neurons with the same intercept (0.5) and  op-posing encoders
-
-model = nengo.Network(label='Two Neurons')
-with model:
-    stim = nengo.Node(lambda t: np.sin(10 * t))
-    ens1 = nengo.Ensemble(n_neurons=2, dimensions=1, encoders=[[1],[-1]], intercepts=[-.5, -.5], max_rates=[100, 100])
-    ens2 = nengo.Ensemble(n_neurons=50, dimensions=1, max_rates=Uniform(100, 200))
-    nengo.Connection(stim, ens1)
-    nengo.Connection(stim, ens2)
-    
-    probe_stim = nengo.Probe(stim)
-    probe1 = nengo.Probe(ens1.neurons, 'output')
-    probe2 = nengo.Probe(ens2.neurons, 'output')
-
-with nengo.Simulator(model) as sim:
-    sim.run(0.6)
-
-t = sim.trange()
-for ens, probe in [(ens1, probe1), (ens2, probe2)]:
+    # Plot results
+    t = sim.trange()
     fig = plt.figure(figsize=(24, 6))
 
+    ## Plot tuning curves
     plt.subplot(1, 3, 1)
-    plt.title(f' {ens.n_neurons} Neuron Tuning Curves')
-    plt.plot(*tuning_curves(ens, sim))
-    plt.xlabel('I')
+    plt.title(f'{ensemble.n_neurons} Neuron Tuning Curves')
+    plt.xlabel('I (mA)')
     plt.ylabel('a (Hz)')
+    plt.plot(*tuning_curves(ensemble, sim))
 
+    ## Plot encoding
     plt.subplot(1, 3, 2)
-    plt.title(f'Encoding by {ens.n_neurons} Neurons')
-    plt.plot(t, sim.data[probe_stim],'r', linewidth=4)
-    plt.ax = plt.gca()
+    plt.title(f'Encoding by {ensemble.n_neurons} Neurons')
     plt.xlabel('Time')
     plt.ylabel('Encoded value')
-    rasterplot(t, sim.data[probe], ax=plt.ax.twinx(), use_eventplot=True)
+    plt.plot(t, sim.data[input_probe],'r', linewidth=4)
+    plt.ax = plt.gca()
+    rasterplot(t, sim.data[output_probe], ax=plt.ax.twinx(), use_eventplot=True)
 
-    x = sim.data[probe_stim][:,0]
-    A = sim.data[probe]
-    gamma = np.dot(A.T,A)
-    upsilon = np.dot(A.T,x)
-    d = np.dot(np.linalg.pinv(gamma), upsilon)
-    xhat = np.dot(A, d)
-
+    ## Plot decoding
     plt.subplot(1, 3, 3)
-    plt.title(f'Decoding by {ens.n_neurons} Neurons')
-    plt.plot(t, x, label='Stimulus', color='r', linewidth=4)
-    plt.plot(t, xhat, label='Decoded stimulus')
-    plt.xlabel('Time')
-    plt.ylabel('Decoded value')
+    plt.title(f'Decoding by {ensemble.n_neurons} Neurons')
+    plt.xlabel('time (s)')
+    plt.ylabel('Encoded value')
+    plt.plot(t, sim.data[input_probe],'r', linewidth=4)
+    plt.plot(t, sim.data[output_probe])
 
+    ## Display plot
     fig.tight_layout(pad=5.0)
     plt.show()
