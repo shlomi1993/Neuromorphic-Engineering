@@ -16,7 +16,7 @@ with model:
     nengo.Connection(ensemble, ensemble, function=feedback, synapse=tau_synapse)
     nengo.Connection(input_node, ensemble)
     probe_input = nengo.Probe(input_node)
-    probe_ensemble = nengo.Probe(ensemble, synapse=0.01)
+    probe_ensemble = nengo.Probe(ensemble, synapse=tau_synapse)
 
 # Model simulation
 with nengo.Simulator(model) as sim:
@@ -26,10 +26,11 @@ with nengo.Simulator(model) as sim:
 t = sim.trange()
 plt.figure(figsize=(12, 5))
 plt.subplot(1, 2, 1)
-plt.plot(t, sim.data[probe_ensemble])
-plt.plot(t, sim.data[probe_input], 'r', label = 'stim', linewidth=2)
+plt.plot(t, sim.data[probe_ensemble], label=['$x_0$', '$x_1$'])
+plt.plot(t, sim.data[probe_input], 'r', label=['stim', ''], linewidth=2)
 plt.xlabel('Time (s)', fontdict={'size': 14})
 plt.ylabel('State Value', fontdict={'size': 14})
+plt.legend()
 plt.subplot(1, 2, 2)
 plt.plot(sim.data[probe_ensemble][:,0],sim.data[probe_ensemble][:,1])
 plt.xlabel('$x_0$', fontdict={'size': 14})
