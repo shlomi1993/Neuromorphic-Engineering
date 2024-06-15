@@ -25,8 +25,9 @@ def ring_attractor(state):
 model = nengo.Network()
 with model:
 
-    # Set the original ring attractor initial conditions as initial stimulus that "turned off" after tau_synapse seconds
-    input_node = nengo.Node(lambda t: input_point if t <= tau_synapse else [0.0, 0.0, 0.0])  
+    # Set the initial conditions as an initial stimulus that "turns off" after tau_synapse seconds
+    stim_func = lambda t: input_point if t <= tau_synapse else [0.0, 0.0, 0.0]
+    input_node = nengo.Node(stim_func)
 
     # Represents a 3D state using 3000 neurons to achieve accuracy at a tolerable computational cost
     ensemble = nengo.Ensemble(n_neurons=3000, dimensions=3, radius=2.0)  
@@ -40,7 +41,7 @@ with model:
 
 # Model simulation
 with nengo.Simulator(model) as sim:
-    sim.run(1.1)
+    sim.run(2.0)
 
 # Extract the solution trajectories
 x_values = sim.data[probe_ensemble][:, 0]
